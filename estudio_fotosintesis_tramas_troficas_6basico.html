@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fotosíntesis y Tramas Tróficas - 6° básico</title>
+  <style>
+    :root{
+      --bg:#f4fbf5;
+      --bg2:#e8f6ec;
+      --panel:#ffffff;
+      --panel-soft:#f7fcf8;
+      --text:#183125;
+      --muted:#4f6d5b;
+      --green:#2f8f5b;
+      --green-2:#59b37d;
+      --leaf:#7acb88;
+      --accent:#b8e986;
+      --gold:#d8b565;
+      --line:rgba(40,85,56,.13);
+      --shadow:0 18px 45px rgba(34,88,56,.12);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: "Segoe UI", Inter, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(184,233,134,.35), transparent 28%),
+        radial-gradient(circle at top right, rgba(122,203,136,.22), transparent 24%),
+        linear-gradient(180deg, #f7fff7 0%, #eef8f0 40%, #f3fbf5 100%);
+      overflow-x:hidden;
+    }
+
+    .leaf-bg, .leaf-bg:before, .leaf-bg:after{
+      position:fixed;
+      border-radius:55% 45% 50% 50%;
+      pointer-events:none;
+      z-index:0;
+      filter:blur(2px);
+    }
+    .leaf-bg{
+      width:180px;height:180px;left:-45px;top:12vh;
+      background:linear-gradient(135deg, rgba(122,203,136,.18), rgba(47,143,91,.08));
+      transform:rotate(-18deg);
+    }
+    .leaf-bg:before{
+      content:"";width:120px;height:120px;right:-160px;top:180px;
+      background:linear-gradient(135deg, rgba(184,233,134,.16), rgba(89,179,125,.08));
+      transform:rotate(35deg);
+    }
+    .leaf-bg:after{
+      content:"";width:150px;height:150px;left:calc(100vw - 220px);top:55vh;
+      background:linear-gradient(135deg, rgba(122,203,136,.14), rgba(216,181,101,.08));
+      transform:rotate(-28deg);
+    }
+
+    .progress{
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:6px;
+      background:rgba(255,255,255,.55);
+      backdrop-filter:blur(8px);
+      z-index:50;
+    }
+    .progress-bar{
+      width:0;height:100%;
+      background:linear-gradient(90deg, var(--green), var(--leaf), var(--gold));
+      box-shadow:0 0 18px rgba(89,179,125,.5);
+      transition:width .25s ease;
+    }
+
+    .side-nav{
+      position:fixed;
+      top:72px;right:16px;
+      width:250px;
+      max-height:calc(100vh - 92px);
+      overflow:auto;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(255,255,255,.65);
+      box-shadow:var(--shadow);
+      border-radius:22px;
+      padding:16px 14px;
+      z-index:30;
+      backdrop-filter:blur(14px);
+    }
+    .side-nav h3{
+      margin:0 0 10px;
+      font-size:1rem;
+      color:var(--green);
+    }
+    .side-nav a{
+      display:block;
+      text-decoration:none;
+      color:var(--text);
+      font-size:.92rem;
+      padding:9px 10px;
+      margin:4px 0;
+      border-radius:12px;
+      transition:.25s ease;
+      border:1px solid transparent;
+    }
+    .side-nav a:hover,
+    .side-nav a.active{
+      background:linear-gradient(90deg, rgba(122,203,136,.18), rgba(184,233,134,.12));
+      border-color:rgba(47,143,91,.16);
+      transform:translateX(-3px);
+    }
+
+    main{
+      position:relative;
+      z-index:1;
+      padding-right:290px;
+    }
+
+    .slide{
+      min-height:100vh;
+      padding:70px 42px 42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .card{
+      width:min(1200px, 100%);
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(255,255,255,.7);
+      border-radius:32px;
+      box-shadow:var(--shadow);
+      padding:34px;
+      backdrop-filter:blur(10px);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:28px;
+      align-items:center;
+    }
+    .badge{
+      display:inline-block;
+      padding:8px 14px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(122,203,136,.18), rgba(184,233,134,.18));
+      color:var(--green);
+      font-weight:700;
+      letter-spacing:.3px;
+      margin-bottom:16px;
+      font-size:.92rem;
+    }
+    h1,h2,h3{margin:0 0 14px}
+    h1{font-size:clamp(2.2rem, 5vw, 4.2rem);line-height:1.02}
+    h2{font-size:clamp(1.75rem, 3vw, 2.6rem);color:var(--green)}
+    h3{font-size:1.2rem;color:var(--green)}
+    p{font-size:1.04rem;line-height:1.72;color:var(--text);margin:0 0 14px}
+    .muted{color:var(--muted)}
+
+    .hero-visual{
+      background:linear-gradient(160deg, rgba(184,233,134,.34), rgba(122,203,136,.18), rgba(255,255,255,.9));
+      border-radius:28px;
+      min-height:360px;
+      padding:24px;
+      position:relative;
+      overflow:hidden;
+      border:1px solid var(--line);
+    }
+    .sun{
+      position:absolute;right:28px;top:28px;
+      width:90px;height:90px;border-radius:50%;
+      background:radial-gradient(circle, #fff6b7 0%, #f7df79 55%, rgba(247,223,121,.1) 70%);
+      box-shadow:0 0 40px rgba(247,223,121,.55);
+    }
+    .plant{
+      position:absolute;left:46px;bottom:38px;width:220px;height:220px;
+    }
+    .stem{position:absolute;left:100px;bottom:10px;width:10px;height:150px;background:linear-gradient(180deg, #3a9e5e, #256d42);border-radius:999px}
+    .leaf{position:absolute;background:linear-gradient(135deg, #86d98f, #37a35f);border-radius:80% 0 80% 0;box-shadow:0 10px 18px rgba(49,124,77,.18)}
+    .leaf.l1{width:90px;height:50px;left:20px;bottom:100px;transform:rotate(-32deg)}
+    .leaf.l2{width:96px;height:54px;left:96px;bottom:120px;transform:rotate(38deg)}
+    .leaf.l3{width:82px;height:48px;left:34px;bottom:58px;transform:rotate(-150deg)}
+    .leaf.l4{width:80px;height:45px;left:108px;bottom:75px;transform:rotate(143deg)}
+    .soil{position:absolute;left:25px;right:25px;bottom:0;height:68px;background:linear-gradient(180deg, #9c7652, #6e4a2f);border-radius:30px 30px 22px 22px}
+    .floating-note{
+      position:absolute;
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(47,143,91,.14);
+      box-shadow:0 14px 22px rgba(0,0,0,.06);
+      border-radius:16px;
+      padding:10px 12px;
+      font-weight:700;
+      color:var(--green);
+      font-size:.95rem;
+    }
+    .n1{left:18px;top:22px}.n2{right:26px;top:136px}.n3{left:175px;bottom:104px}
+
+    .grid-2, .grid-3{
+      display:grid;gap:18px;
+    }
+    .grid-2{grid-template-columns:repeat(2, minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3, minmax(0,1fr))}
+
+    .mini-card{
+      background:var(--panel-soft);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:0 10px 22px rgba(22,58,38,.05);
+    }
+    .mini-card strong{
+      display:block;
+      font-size:1rem;
+      margin-bottom:8px;
+      color:var(--green);
+    }
+
+    .oa-list .mini-card{border-left:6px solid var(--green-2)}
+    .step{
+      display:grid;
+      grid-template-columns:72px 1fr;
+      gap:18px;
+      align-items:start;
+      margin-bottom:18px;
+    }
+    .step-number{
+      width:72px;height:72px;border-radius:22px;
+      display:grid;place-items:center;
+      font-size:1.5rem;font-weight:900;
+      color:white;
+      background:linear-gradient(160deg, var(--green), var(--green-2));
+      box-shadow:0 12px 24px rgba(47,143,91,.2);
+    }
+
+    .equation{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      margin-top:14px;
+      font-weight:800;font-size:1.05rem;
+    }
+    .eq-box{
+      padding:12px 16px;border-radius:16px;background:#fff;border:1px solid var(--line);
+      box-shadow:0 8px 18px rgba(0,0,0,.05)
+    }
+
+    .flow{
+      display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;
+      margin-top:18px;
+    }
+    .flow .node{
+      background:#fff;padding:15px 18px;border-radius:18px;border:1px solid var(--line);font-weight:800;min-width:130px;text-align:center
+    }
+    .arrow{font-size:1.5rem;color:var(--green)}
+
+    .ecosystem{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px
+    }
+    .tier{
+      padding:18px;border-radius:22px;border:1px solid var(--line);
+      background:linear-gradient(180deg, #ffffff, #f5fbf7);
+      text-align:center;
+    }
+    .tier .emoji{font-size:2rem;margin-bottom:8px;display:block}
+    .tier h4{margin:0 0 8px;color:var(--green);font-size:1.05rem}
+    .tier p{font-size:.98rem;line-height:1.55;margin:0}
+
+    .compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .compare .mini-card{height:100%}
+
+    .video-wrap{
+      position:relative;
+      width:100%;
+      aspect-ratio:16/9;
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:0 16px 30px rgba(19,54,33,.12);
+      border:1px solid var(--line);
+      background:#000;
+    }
+    .video-wrap iframe{width:100%;height:100%;border:0}
+
+    .study-box{
+      background:linear-gradient(180deg, rgba(184,233,134,.22), rgba(255,255,255,.7));
+      border:1px solid rgba(89,179,125,.2);
+      border-radius:22px;
+      padding:20px;
+    }
+
+    ul.clean{margin:0;padding-left:20px}
+    ul.clean li{margin:8px 0;line-height:1.6}
+
+    .footer-note{
+      margin-top:16px;
+      padding-top:14px;
+      border-top:1px dashed rgba(47,143,91,.25);
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.6;
+    }
+
+    .nav-buttons{
+      margin-top:24px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:700;
+      border:1px solid rgba(47,143,91,.16);transition:.25s ease;
+    }
+    .btn.primary{background:linear-gradient(90deg, var(--green), var(--green-2));color:white;box-shadow:0 10px 22px rgba(47,143,91,.18)}
+    .btn.secondary{background:#fff;color:var(--green)}
+    .btn:hover{transform:translateY(-2px)}
+
+    @media (max-width: 1100px){
+      .side-nav{position:static;width:auto;max-height:none;margin:14px 20px 0}
+      main{padding-right:0}
+      .slide{padding:24px 20px 20px;min-height:auto}
+      .card{padding:24px}
+    }
+    @media (max-width: 900px){
+      .hero,.grid-2,.grid-3,.compare,.ecosystem{grid-template-columns:1fr}
+      .step{grid-template-columns:1fr}
+      .step-number{width:62px;height:62px}
+      h1{font-size:2.35rem}
+      .slide{padding-top:18px}
+      .hero-visual{min-height:320px}
+      .plant{transform:scale(.88);transform-origin:left bottom}
+    }
+  </style>
+</head>
+<body>
+  <div class="leaf-bg"></div>
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+  <aside class="side-nav" id="sideNav">
+    <h3>Ruta de estudio</h3>
+    <a href="#inicio">Inicio</a>
+    <a href="#indice">Índice</a>
+    <a href="#oa">Objetivos de aprendizaje</a>
+    <a href="#intro">Ideas clave</a>
+    <a href="#fotosintesis">Fotosíntesis</a>
+    <a href="#pasos">Paso a paso</a>
+    <a href="#ecuacion">Resumen del proceso</a>
+    <a href="#tramas">Cadenas y tramas tróficas</a>
+    <a href="#niveles">Niveles tróficos</a>
+    <a href="#humano">Impacto humano</a>
+    <a href="#videos">Videos de apoyo</a>
+    <a href="#repaso">Repaso final</a>
+  </aside>
+
+  <main>
+    <section class="slide" id="inicio">
+      <div class="card hero">
+        <div>
+          <span class="badge">Material de estudio · Ciencias Naturales · 6° básico</span>
+          <h1>Fotosíntesis y<br>tramas tróficas</h1>
+          <p class="muted"><strong>Mister Nicolás Espinoza</strong></p>
+          <p>Este material fue pensado para que puedan estudiar <strong>con calma, paso a paso y sin enredos</strong>. Aquí encontrarán los conceptos más importantes sobre fotosíntesis, cadenas alimentarias, redes tróficas e impacto humano en los ecosistemas.</p>
+          <p>La idea es que lo lean como una presentación, pero también como una guía de estudio simple, bonita y fácil de entender.</p>
+          <div class="nav-buttons">
+            <a class="btn primary" href="#indice">Comenzar</a>
+            <a class="btn secondary" href="#videos">Ir a los videos</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="sun"></div>
+          <div class="floating-note n1">☀️ Luz</div>
+          <div class="floating-note n2">🌫️ CO₂</div>
+          <div class="floating-note n3">💧 Agua</div>
+          <div class="plant">
+            <div class="stem"></div>
+            <div class="leaf l1"></div>
+            <div class="leaf l2"></div>
+            <div class="leaf l3"></div>
+            <div class="leaf l4"></div>
+          </div>
+          <div class="soil"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="indice">
+      <div class="card">
+        <h2>Índice</h2>
+        <div class="grid-2">
+          <div class="mini-card"><strong>1. Objetivos de aprendizaje</strong> Qué pide el currículum chileno de 6° básico.</div>
+          <div class="mini-card"><strong>2. Ideas clave</strong> Qué debemos recordar antes de empezar.</div>
+          <div class="mini-card"><strong>3. Fotosíntesis</strong> Qué es, qué necesita y qué produce.</div>
+          <div class="mini-card"><strong>4. Paso a paso</strong> Cómo ocurre la fotosíntesis de forma sencilla.</div>
+          <div class="mini-card"><strong>5. Cadenas y tramas tróficas</strong> Cómo pasa la energía entre los seres vivos.</div>
+          <div class="mini-card"><strong>6. Niveles tróficos</strong> Productores, consumidores y descomponedores.</div>
+          <div class="mini-card"><strong>7. Impacto humano</strong> Cómo nuestras acciones alteran el equilibrio.</div>
+          <div class="mini-card"><strong>8. Videos y repaso final</strong> Para reforzar y estudiar mejor.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="oa">
+      <div class="card">
+        <h2>Objetivos de aprendizaje</h2>
+        <p>Estos contenidos están alineados con el currículum chileno de <strong>6° básico en Ciencias Naturales</strong>.</p>
+        <div class="grid-3 oa-list">
+          <div class="mini-card">
+            <strong>OA 1</strong>
+            Explicar, a partir de una investigación experimental, los requerimientos de <strong>agua, dióxido de carbono y energía lumínica</strong> para la producción de azúcar y liberación de oxígeno en la fotosíntesis.
+          </div>
+          <div class="mini-card">
+            <strong>OA 2</strong>
+            Representar, por medio de modelos, la <strong>transferencia de energía y materia</strong> desde los organismos fotosintéticos a otros seres vivos por medio de cadenas y redes alimentarias.
+          </div>
+          <div class="mini-card">
+            <strong>OA 3</strong>
+            Analizar los <strong>efectos de la actividad humana</strong> sobre las redes alimentarias.
+          </div>
+        </div>
+        <div class="footer-note">
+          Ojo: en esta presentación los OA están redactados en lenguaje más simple para estudiar mejor, pero respetan el foco oficial del programa.
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="intro">
+      <div class="card">
+        <h2>Ideas clave antes de comenzar</h2>
+        <div class="grid-2">
+          <div class="mini-card">
+            <strong>La vida en los ecosistemas está conectada</strong>
+            Ningún ser vivo vive completamente aislado. Todos dependen de otros seres vivos y del ambiente.
+          </div>
+          <div class="mini-card">
+            <strong>La energía no aparece de la nada</strong>
+            En casi todos los ecosistemas, la energía comienza en el <strong>Sol</strong>.
+          </div>
+          <div class="mini-card">
+            <strong>Las plantas son fundamentales</strong>
+            Gracias a la fotosíntesis, producen alimento y liberan oxígeno.
+          </div>
+          <div class="mini-card">
+            <strong>Si una parte se altera, el sistema cambia</strong>
+            Por eso la contaminación, la caza excesiva o la destrucción del hábitat afectan a todo el ecosistema.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="fotosintesis">
+      <div class="card">
+        <h2>¿Qué es la fotosíntesis?</h2>
+        <p>La <strong>fotosíntesis</strong> es el proceso mediante el cual las plantas, algas y algunos otros organismos producen su propio alimento.</p>
+        <div class="compare">
+          <div class="mini-card">
+            <strong>¿Qué necesitan?</strong>
+            <ul class="clean">
+              <li>☀️ Luz solar</li>
+              <li>💧 Agua</li>
+              <li>🌫️ Dióxido de carbono (CO₂)</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <strong>¿Qué producen?</strong>
+            <ul class="clean">
+              <li>🍬 Azúcar o glucosa, que sirve como alimento</li>
+              <li>🌬️ Oxígeno, que se libera al ambiente</li>
+            </ul>
+          </div>
+        </div>
+        <div class="study-box" style="margin-top:18px">
+          <strong>Concepto clave:</strong>
+          <p style="margin-top:8px">Las plantas son llamadas <strong>organismos productores</strong> porque pueden fabricar su propio alimento. Esa es la gran diferencia con los animales, que deben obtener energía alimentándose de otros seres vivos.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="pasos">
+      <div class="card">
+        <h2>La fotosíntesis paso a paso</h2>
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="mini-card">
+            <strong>La planta capta la luz del Sol</strong>
+            La energía lumínica es absorbida principalmente por las hojas.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="mini-card">
+            <strong>La planta absorbe agua</strong>
+            El agua entra por las raíces y viaja por el interior de la planta.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="mini-card">
+            <strong>La planta toma dióxido de carbono del aire</strong>
+            Este gas entra principalmente por pequeñas aberturas de las hojas llamadas estomas.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="mini-card">
+            <strong>Se fabrica azúcar</strong>
+            La planta usa esa energía y esos materiales para producir su alimento.
+          </div>
+        </div>
+        <div class="step" style="margin-bottom:0">
+          <div class="step-number">5</div>
+          <div class="mini-card">
+            <strong>Se libera oxígeno</strong>
+            Parte del resultado del proceso se libera al ambiente y sirve para muchos seres vivos, incluido el ser humano.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="ecuacion">
+      <div class="card">
+        <h2>Resumen simple del proceso</h2>
+        <p>Esta no es una fórmula para memorizar palabra por palabra, sino una manera simple de recordar lo esencial:</p>
+        <div class="equation">
+          <div class="eq-box">💧 Agua</div>
+          <div class="eq-box">+</div>
+          <div class="eq-box">🌫️ Dióxido de carbono</div>
+          <div class="eq-box">+</div>
+          <div class="eq-box">☀️ Luz</div>
+          <div class="eq-box">→</div>
+          <div class="eq-box">🍬 Azúcar</div>
+          <div class="eq-box">+</div>
+          <div class="eq-box">🌬️ Oxígeno</div>
+        </div>
+        <div class="grid-2" style="margin-top:22px">
+          <div class="mini-card">
+            <strong>¿Por qué es importante?</strong>
+            Porque permite que exista alimento en la base de los ecosistemas y también aporta oxígeno a la atmósfera.
+          </div>
+          <div class="mini-card">
+            <strong>Error común</strong>
+            Pensar que las plantas “comen tierra”. En realidad, la tierra les aporta minerales, pero su alimento lo fabrican en la fotosíntesis.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="tramas">
+      <div class="card">
+        <h2>Cadenas y tramas tróficas</h2>
+        <p>Una <strong>cadena trófica</strong> muestra una ruta simple de alimentación: quién se come a quién. Una <strong>trama o red trófica</strong> muestra varias cadenas conectadas entre sí.</p>
+        <div class="flow">
+          <div class="node">☀️ Sol</div>
+          <div class="arrow">→</div>
+          <div class="node">🌿 Planta</div>
+          <div class="arrow">→</div>
+          <div class="node">🐇 Herbívoro</div>
+          <div class="arrow">→</div>
+          <div class="node">🦊 Carnívoro</div>
+        </div>
+        <div class="grid-2" style="margin-top:20px">
+          <div class="mini-card">
+            <strong>Cadena trófica</strong>
+            Es lineal y simple. Sirve para entender el recorrido básico de la energía.
+          </div>
+          <div class="mini-card">
+            <strong>Trama trófica</strong>
+            Es más realista, porque en la naturaleza un ser vivo puede alimentarse de varios otros organismos.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="niveles">
+      <div class="card">
+        <h2>Niveles tróficos</h2>
+        <div class="ecosystem">
+          <div class="tier">
+            <span class="emoji">🌿</span>
+            <h4>Productores</h4>
+            <p>Son los organismos que elaboran su propio alimento, como las plantas.</p>
+          </div>
+          <div class="tier">
+            <span class="emoji">🐛</span>
+            <h4>Consumidores primarios</h4>
+            <p>Son herbívoros. Se alimentan de productores.</p>
+          </div>
+          <div class="tier">
+            <span class="emoji">🐍</span>
+            <h4>Consumidores secundarios o terciarios</h4>
+            <p>Son carnívoros u omnívoros que comen otros consumidores.</p>
+          </div>
+          <div class="tier">
+            <span class="emoji">🍄</span>
+            <h4>Descomponedores</h4>
+            <p>Deshacen restos de seres vivos y ayudan a reciclar la materia.</p>
+          </div>
+        </div>
+        <div class="study-box" style="margin-top:18px">
+          <strong>Muy importante:</strong>
+          <p style="margin-top:8px">La energía va pasando de un nivel a otro, pero <strong>siempre comienza en los organismos fotosintéticos</strong>. Por eso las plantas son la base de casi todas las cadenas y redes alimentarias.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="humano">
+      <div class="card">
+        <h2>¿Cómo afecta el ser humano a las redes alimentarias?</h2>
+        <div class="grid-3">
+          <div class="mini-card">
+            <strong>Contaminación</strong>
+            Puede dañar el agua, el suelo y el aire, afectando a las especies que viven allí.
+          </div>
+          <div class="mini-card">
+            <strong>Deforestación</strong>
+            Al eliminar plantas y bosques, desaparece la base alimentaria y el hábitat de muchas especies.
+          </div>
+          <div class="mini-card">
+            <strong>Sobreexplotación</strong>
+            La caza o pesca excesiva puede romper el equilibrio de una red trófica.
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:18px">
+          <div class="mini-card">
+            <strong>Ejemplo sencillo</strong>
+            Si disminuye mucho una especie de insecto, también pueden disminuir las aves que se alimentan de ella.
+          </div>
+          <div class="mini-card">
+            <strong>Idea final</strong>
+            Cuando una parte del ecosistema cambia mucho, las demás también se ven afectadas.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="videos">
+      <div class="card">
+        <h2>Videos de apoyo para estudiar</h2>
+        <div class="grid-2">
+          <div>
+            <div class="video-wrap">
+              <iframe src="https://www.youtube.com/embed/RndKOKedrt4" title="¿Cuál fue la primera planta?" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <p style="margin-top:10px"><strong>¿Cuál fue la primera planta?</strong><br><span class="muted">Sirve para comprender la importancia y evolución de las plantas.</span></p>
+          </div>
+          <div>
+            <div class="video-wrap">
+              <iframe src="https://www.youtube.com/embed/jQchvJoOAFo" title="Qué es la fotosíntesis y cómo se produce" allow="accelerometer; autoplay; clipboard-write; encrypted-media; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <p style="margin-top:10px"><strong>Qué es la fotosíntesis y cómo se produce</strong><br><span class="muted">Explicación simple, ideal para reforzar el proceso.</span></p>
+          </div>
+        </div>
+        <div style="margin-top:18px">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/Hut5uxHda38?start=121" title="Tramas tróficas" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+          <p style="margin-top:10px"><strong>Tramas tróficas</strong><br><span class="muted">Ayuda a visualizar relaciones alimentarias dentro de un ecosistema.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="repaso">
+      <div class="card">
+        <h2>Repaso final</h2>
+        <div class="grid-2">
+          <div class="mini-card">
+            <strong>Debes recordar sí o sí</strong>
+            <ul class="clean">
+              <li>La fotosíntesis necesita <strong>agua, CO₂ y luz</strong>.</li>
+              <li>Produce <strong>azúcar y oxígeno</strong>.</li>
+              <li>Las plantas son <strong>productores</strong>.</li>
+              <li>La energía pasa desde productores a consumidores.</li>
+              <li>Las tramas tróficas muestran conexiones entre varias cadenas.</li>
+              <li>La actividad humana puede alterar el equilibrio ecológico.</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <strong>Preguntas para autoevaluarte</strong>
+            <ul class="clean">
+              <li>¿Qué necesita una planta para hacer fotosíntesis?</li>
+              <li>¿Qué diferencia hay entre cadena y trama trófica?</li>
+              <li>¿Por qué las plantas son tan importantes para los ecosistemas?</li>
+              <li>¿Qué ocurre si desaparece una especie de una red alimentaria?</li>
+            </ul>
+          </div>
+        </div>
+        <div class="study-box" style="margin-top:18px">
+          <strong>Cierre</strong>
+          <p style="margin-top:8px">Si entienden que <strong>todo parte con la energía del Sol y con los organismos fotosintéticos</strong>, ya tienen la base más importante de esta unidad. Desde ahí, todo lo demás comienza a tener sentido.</p>
+        </div>
+        <div class="footer-note">
+          Material preparado para estudio y repaso. Ideal para leer antes de una guía, prueba, actividad o clase.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const sections = [...document.querySelectorAll('.slide')];
+    const navLinks = [...document.querySelectorAll('.side-nav a')];
+    const progressBar = document.getElementById('progressBar');
+
+    function updateProgress(){
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const percent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressBar.style.width = percent + '%';
+
+      let currentId = sections[0].id;
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if(rect.top <= window.innerHeight * 0.35 && rect.bottom >= window.innerHeight * 0.35){
+          currentId = section.id;
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + currentId);
+      });
+    }
+
+    document.addEventListener('scroll', updateProgress, {passive:true});
+    window.addEventListener('load', updateProgress);
+  </script>
+</body>
+</html>
